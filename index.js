@@ -23,6 +23,7 @@ async function run() {
         //   await client.connect();
 
         const serviceCollection = client.db("servicesDB").collection('services');
+        const bookedCollection = client.db("servicesDB").collection('bookedServices');
 
         app.get('/services', async (req, res) =>{
             const cursor = serviceCollection.find()
@@ -40,6 +41,13 @@ async function run() {
         app.post('/services', async (req, res) =>{
             const newService = req.body
             const result = await serviceCollection.insertOne(newService)
+            res.send(result)
+        })
+
+        //server AIP for booked services
+        app.post('/bookedServices', async (req,res)=>{
+            const newBooekdService = req.body;
+            const result = await bookedCollection.insertOne(newBooekdService)
             res.send(result)
         })
 
