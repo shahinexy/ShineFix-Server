@@ -26,7 +26,7 @@ async function run() {
 
         const serviceCollection = client.db("servicesDB").collection('services');
         const bookedCollection = client.db("servicesDB").collection('bookedServices');
-        console.log('hellow world');
+
         app.get('/services', async (req, res) => {
             const cursor = serviceCollection.find()
             const result = await cursor.toArray()
@@ -42,7 +42,7 @@ async function run() {
 
         app.get('/services/email/:providerEmail', async (req, res) => {
             const email = req.params.providerEmail;
-            const query = { providerEmail: email}
+            const query = { providerEmail: email }
             const result = await serviceCollection.find(query).toArray()
             res.send(result)
         })
@@ -51,6 +51,39 @@ async function run() {
             const newService = req.body
             const result = await serviceCollection.insertOne(newService)
             res.send(result)
+        })
+
+        app.patch('/services/id/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const query = { _id: new ObjectId(id)}
+            const updateData = {
+                $set: {
+                    serviceName: data.serviceName,
+                    servicePhoto: data.servicePhoto,
+                    servicePrice: data.servicePrice,
+                    serviceArea: data.serviceArea,
+                    description: data.description,
+                }
+            }
+
+            const result = await serviceCollection.updateOne(query, updateData)
+            res.send(result)
+        })
+
+        app.delete('/services/id/:id', async (req, res) => {
+            const id = req.params.id;
+            try {
+                console.log(id);
+                const query = { _id: new ObjectId(id) }
+                const result = await serviceCollection.deleteOne(query)
+                res.send(result)
+
+            }
+            catch (error) {
+                console.error("Error deleting service:", error);
+                res.status(500).send("Error deleting service")
+            }
         })
 
         //server AIP for booked services
@@ -68,7 +101,7 @@ async function run() {
         })
         app.get('/bookedServices/email/:currentUseremail', async (req, res) => {
             const email = req.params.currentUseremail;
-            const query = { currentUseremail: email}
+            const query = { currentUseremail: email }
             const result = await bookedCollection.find(query).toArray()
             res.send(result)
         })
