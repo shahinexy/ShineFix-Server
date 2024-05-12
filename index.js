@@ -45,6 +45,12 @@ async function run() {
         })
 
         //server AIP for booked services
+        app.get('/bookedServices', async (req, res) =>{
+            const cursor = bookedCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
         app.post('/bookedServices', async (req,res)=>{
             const newBooekdService = req.body;
             const result = await bookedCollection.insertOne(newBooekdService)
