@@ -11,6 +11,8 @@ app.use(express.json())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.76h69in.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
+// const uri = "mongodb+srv://HoureRepaire:q5vKhoIWm9T4urU2@cluster0.76h69in.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -24,40 +26,53 @@ async function run() {
 
         const serviceCollection = client.db("servicesDB").collection('services');
         const bookedCollection = client.db("servicesDB").collection('bookedServices');
-
-        app.get('/services', async (req, res) =>{
+        console.log('hellow world');
+        app.get('/services', async (req, res) => {
             const cursor = serviceCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/services/:id', async (req,res)=>{
+        app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await serviceCollection.findOne(query)
             res.send(result)
         })
 
-        app.post('/services', async (req, res) =>{
+        app.post('/services', async (req, res) => {
             const newService = req.body
             const result = await serviceCollection.insertOne(newService)
             res.send(result)
         })
 
         //server AIP for booked services
-        app.get('/bookedServices', async (req, res) =>{
+        app.get('/bookedServices', async (req, res) => {
             const cursor = bookedCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.post('/bookedServices', async (req,res)=>{
+        app.get('/bookedServices/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await bookedCollection.findOne(query)
+            res.send(result)
+        })
+        app.get('/bookedServices/email/:currentUseremail', async (req, res) => {
+            const email = req.params.currentUseremail;
+            const query = { currentUseremail: email}
+            const result = await bookedCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.post('/bookedServices', async (req, res) => {
             const newBooekdService = req.body;
             const result = await bookedCollection.insertOne(newBooekdService)
             res.send(result)
         })
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
 
