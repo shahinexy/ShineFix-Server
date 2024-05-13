@@ -6,12 +6,17 @@ const app = express()
 const port = process.env.PORT || 5000
 
 // midlewear 
-app.use(cors())
+// app.use(cors())
 app.use(express.json())
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.76h69in.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const corsConfig = {
+    origin: ["http://localhost:5173", "https://shinefix-a-10.web.app", "https://shinefix-a-10.firebaseapp.com"],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+};
+app.use(cors(corsConfig));
 
-// const uri = "mongodb+srv://HoureRepaire:q5vKhoIWm9T4urU2@cluster0.76h69in.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.76h69in.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -86,7 +91,7 @@ async function run() {
             }
         })
 
-        //server AIP for booked services
+        // ========== server AIP for booked services ============
         app.get('/bookedServices', async (req, res) => {
             const cursor = bookedCollection.find()
             const result = await cursor.toArray()
@@ -99,9 +104,17 @@ async function run() {
             const result = await bookedCollection.findOne(query)
             res.send(result)
         })
+
         app.get('/bookedServices/email/:currentUseremail', async (req, res) => {
             const email = req.params.currentUseremail;
             const query = { currentUseremail: email }
+            const result = await bookedCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/bookedServices/provider/:providerEmail', async (req, res) => {
+            const email = req.params.providerEmail;
+            const query = { providerEmail: email }
             const result = await bookedCollection.find(query).toArray()
             res.send(result)
         })
