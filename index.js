@@ -122,12 +122,12 @@ async function run() {
         app.patch('/bookedServices/:id', async (req, res) =>{
             const id = req.params.id
             const status = req.body
-            console.log(status);
             const query = {_id: new ObjectId(id)}
             const updateData = {
                 $set: status
             }
             const result = await bookedCollection.updateOne(query, updateData)
+            res.send(result)
         })
 
         app.post('/bookedServices', async (req, res) => {
