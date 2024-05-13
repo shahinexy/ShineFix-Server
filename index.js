@@ -119,6 +119,17 @@ async function run() {
             res.send(result)
         })
 
+        app.patch('/bookedServices/:id', async (req, res) =>{
+            const id = req.params.id
+            const status = req.body
+            console.log(status);
+            const query = {_id: new ObjectId(id)}
+            const updateData = {
+                $set: status
+            }
+            const result = await bookedCollection.updateOne(query, updateData)
+        })
+
         app.post('/bookedServices', async (req, res) => {
             const newBooekdService = req.body;
             const result = await bookedCollection.insertOne(newBooekdService)
