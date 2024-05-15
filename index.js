@@ -33,9 +33,27 @@ async function run() {
         const bookedCollection = client.db("servicesDB").collection('bookedServices');
 
         app.get('/services', async (req, res) => {
-            const cursor = serviceCollection.find()
-            const result = await cursor.toArray()
-            res.send(result)
+            const filter = req.query;
+            const query = {}
+            const options = {
+                sort: {
+                    servicePrice: filter.sort === 'asc' ? 1 : -1
+                },
+                collation: {
+                    locale: "en_US",
+                    numericOrdering: true
+                }
+            }
+
+            if (filter.sort !== "non") {
+                const cursor = serviceCollection.find(query, options)
+                const result = await cursor.toArray()
+                res.send(result)
+            } else {
+                const cursor = serviceCollection.find()
+                const result = await cursor.toArray()
+                res.send(result)
+            }
         })
 
         app.get('/services/:id', async (req, res) => {
@@ -61,7 +79,7 @@ async function run() {
         app.patch('/services/id/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body;
-            const query = { _id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const updateData = {
                 $set: {
                     serviceName: data.serviceName,
@@ -119,10 +137,10 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/bookedServices/:id', async (req, res) =>{
+        app.patch('/bookedServices/:id', async (req, res) => {
             const id = req.params.id
             const status = req.body
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const updateData = {
                 $set: status
             }
