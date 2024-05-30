@@ -2,12 +2,57 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const nodemailer = require("nodemailer");
 const app = express()
 const port = process.env.PORT || 5000
 
 // midlewear 
 // app.use(cors())
 app.use(express.json())
+
+// kekp hyvl gwed ybfv
+
+
+// send email functionality
+const sendEmail = (emailAddress, emailDetails) =>{
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // Use `true` for port 465, `false` for all other ports
+        auth: {
+          user: process.env.TRANSPORTER_MAIL,
+          pass: process.env.TRANSPORTER_PASS,
+        },
+      });
+
+      // varify
+      transporter.verify(function (error, success) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Server is ready to take our messages");
+        }
+      });
+
+      const mailBody = {
+        from: `"ShineFix 👻" <${process.env.TRANSPORTER_MAIL}>`, // sender address
+        to: emailAddress, // list of receivers
+        subject: emailDetails.subject, // Subject line
+        html: emailDetails.message, // html body
+      }
+
+     transporter.sendMail(mailBody, (error, info)=>{
+        if(error) {
+            console.log(error);
+        }else{
+            console.log('email send: ', info.response);
+        }
+     });
+
+      
+}
+
 
 const corsConfig = {
     origin: ["http://localhost:5173", "https://shinefix-a-10.web.app", "https://shinefix-a-10.firebaseapp.com"],
@@ -45,7 +90,7 @@ async function run() {
                 }
             }
 
-            if (filter.sort !== "non") {
+            if (filter.sort === "asc" || filter.sort === "dsc") {
                 const cursor = serviceCollection.find(query, options)
                 const result = await cursor.toArray()
                 res.send(result)
@@ -151,6 +196,18 @@ async function run() {
         app.post('/bookedServices', async (req, res) => {
             const newBooekdService = req.body;
             const result = await bookedCollection.insertOne(newBooekdService)
+            // send email to user
+            console.log('current user ==>',newBooekdService?.currentUseremail);
+            sendEmail(newBooekdService?.currentUseremail, {
+                subject: 'Booking successfull',
+                message: 'You have successfully book a service, Service provider contact you as soon as possible'
+            })
+            // send email to provider
+            sendEmail(newBooekdService?.providerEmail, {
+                subject: `${newBooekdService.currentUserName} booked your service ${newBooekdService.serviceName}`,
+                message: `${newBooekdService.instruction}`
+            })
+
             res.send(result)
         })
 
