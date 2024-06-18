@@ -36,7 +36,7 @@ const sendEmail = (emailAddress, emailDetails) =>{
       });
 
       const mailBody = {
-        from: `"ShineFix 👻" <${process.env.TRANSPORTER_MAIL}>`, // sender address
+        from: `"ShineFix" <${process.env.TRANSPORTER_MAIL}>`, // sender address
         to: emailAddress, // list of receivers
         subject: emailDetails.subject, // Subject line
         html: emailDetails.message, // html body
@@ -196,6 +196,7 @@ async function run() {
         app.post('/bookedServices', async (req, res) => {
             const newBooekdService = req.body;
             const result = await bookedCollection.insertOne(newBooekdService)
+            
             // send email to user
             console.log('current user ==>',newBooekdService?.currentUseremail);
             sendEmail(newBooekdService?.currentUseremail, {
